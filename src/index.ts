@@ -2,7 +2,6 @@ import "dotenv/config";
 
 import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import Fastify from "fastify";
 import {
@@ -14,6 +13,7 @@ import {
 import { z } from "zod";
 
 import { auth } from "./lib/auth.js";
+import { transactionRoutes } from "./routes/transaction-routes.js";
 
 const app = Fastify({
   logger: true,
@@ -27,8 +27,8 @@ app.setSerializerCompiler(serializerCompiler);
 await app.register(fastifySwagger, {
   openapi: {
     info: {
-      title: "bootcamp-treinos-api",
-      description: "API para o bootcamp de treinos",
+      title: "finanças-api",
+      description: "API para gerenciamento de finanças pessoais",
       version: "1.0.0",
     },
   },
@@ -46,8 +46,8 @@ await app.register(fastifyApiReference, {
   configuration: {
     sources: [
       {
-        title: "Bootcamp Treinos API",
-        slug: "bootcamp-treinos-api",
+        title: "finanças-api",
+        slug: "finanças-api",
         url: "/swagger.json",
       },
       {
@@ -121,6 +121,7 @@ app.route({
   },
 });
 // Start server
+await app.register(transactionRoutes);
 const start = async () => {
   try {
     await app.listen({

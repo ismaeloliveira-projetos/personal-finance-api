@@ -1,78 +1,46 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String        @id 
-  workoutPlans  WorkoutPlan[]
+  id            String        @id
   name          String
   email         String
   emailVerified Boolean       @default(false)
   image         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
   sessions      Session[]
   accounts      Account[]
+  transactions  Transaction[]
 
   @@unique([email])
   @@map("user")
 }
 
-model WorkoutPlan {
-  id          String       @id @default(uuid())
-  name        String
-  userID      String
-  user        User         @relation(fields: [userID], references: [id])
-  workoutDays WorkoutDay[]
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+model Transaction {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Float
+  type      TransactionType
+  category  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
-enum WeekDay {
-  MONDAY
-  TUESDAY
-  WEDNESDAY
-  THURSDAY
-  FRIDAY
-  SATURDAY
-  SUNDAY
-}
-
-model WorkoutDay {
-  id            String            @id @default(uuid())
-  name          String
-  workoutPlanID String
-  workoutPlan   WorkoutPlan       @relation(fields: [workoutPlanID], references: [id])
-  isRest        Boolean           @default(false)
-  weekDay       String
-  exercises     WorkoutExercise[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-}
-
-model WorkoutExercise {
-  id                String     @id @default(uuid())
-  name              String
-  order             Int
-  workoutDayID      String
-  workoutDay        WorkoutDay @relation(fields: [workoutDayID], references: [id])
-  sets              Int
-  reps              Int
-  restTimeInSeconds Int
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+enum TransactionType {
+  INCOME
+  EXPENSE
 }
 
 model Session {
